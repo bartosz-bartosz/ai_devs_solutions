@@ -7,10 +7,17 @@ from openai_client import OpenAIClient
 
 TASK_IDENTIFIER = "JSON"
 
-class InputCleaner:
-    def __init__(self, input_json_file: str = "task_input.json"):
+SYSTEM_PROMPT = (
+    "Provide an answer to the question below. Do not include anything else in your response."
+)
+
+
+class TaskSolver:
+    def __init__(self, input_json_file: str, openai_client: OpenAIClient):
         self.current_path = os.path.dirname(os.path.abspath(__file__))
         self.json_content = self._read_input_json(input_json_file)
+        self.openai_client = openai_client
+        self.processed_questions = []
 
     @property
     def questions(self) -> list:
@@ -27,28 +34,14 @@ class InputCleaner:
             data = json.load(file)
             return data
 
-    def group_questions(self) -> tuple[list, list]:
-        """Divide questions into two groups: mathematical ones and questions for LLM"""
-        math_questions = []
-        llm_questions = []
-
-        for question in self.questions:
-            if question.get("test"):
-                llm_questions.append(question)
-            else:
-                math_questions.append(question)
-
-        logging.info(f"\nMath questions: {len(math_questions)}\nLLM questions: {len(llm_questions)}")
-
-        return math_questions, llm_questions
-
     def fix_math_question(self, question: dict):
-        logging.info("Fixing math question...")
         try:
             numbers_to_add = map(int, map(str.strip, question["question"].split("+")))
             correct_answer = sum(numbers_to_add)
             if question.get("answer") != correct_answer:
-                logging.info(f"Correcting answer for question: {question['question']} = {question['answer']} to {correct_answer}")
+                logging.info(
+                    f"Correcting answer for question: {question['question']} = {question['answer']} to {correct_answer}"
+                )
             question["answer"] = correct_answer
         except (ValueError, KeyError):
             raise ValueError(f"Invalid math question: {question.get('question', 'Unknown')}")
@@ -57,24 +50,46 @@ class InputCleaner:
 
     def process_questions(self) -> list:
         for question in self.questions:
-            question = self.fix_math_question(question)
-            if question.get("test"):
-                pass
+            try:
+                question = self.fix_math_question(question)
+                if question.get("test"):
+                    question_for_llm = question.get("test").get("q")
+                    logging.info(
+                        f"Recognized a question for LLM: {question_for_llm}. Asking OpenAI..."
+                    )
+                    llm_answer = self.openai_client.send_message(question_for_llm)
+                    logging.info(f"LLM answer: {llm_answer}")
+                    question["test"]["a"] = llm_answer
+                self.processed_questions.append(question)
+
+            except Exception as e:
+                raise ValueError(
+                    f"Error processing question: {question.get('question', 'Unknown')}. Error: {e}"
+                )
+
+        return self.processed_questions
+
 
 def main():
     logging.info("Starting task 03...")
 
-    system_prompt = ""
     # Instantiate classes
-    openai_client = OpenAIClient(system_prompt=system_prompt)
+    openai_client = OpenAIClient(system_prompt=SYSTEM_PROMPT)
     centrala_client = CentralaClient(task_identifier=TASK_IDENTIFIER)
-    input_cleaner = InputCleaner()
+    task_solver = TaskSolver(input_json_file="task_input.json", openai_client=openai_client)
 
-    # Task logic
-    math_questions, llm_questions = input_cleaner.group_questions()
-    fixed_math_questions = input_cleaner.fix_math_questions(math_questions)
-    logging.info(f"LLM Questions to answer: {llm_questions}")
+    # ---- Task logic
 
+    # Answer the questions
+    answered_questions = task_solver.process_questions()
+
+    # Update the JSON content with the answers
+    task_solver.json_content.update(
+        {"apikey": os.environ.get("CENTRALA_API_KEY"), "test-data": answered_questions}
+    )
+
+    # Send the answer to Centrala
+    centrala_client.send_answer(task_solver.json_content)
 
 
 if __name__ == "__main__":
