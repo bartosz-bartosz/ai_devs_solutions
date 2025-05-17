@@ -1,9 +1,7 @@
 import logging
 import os
-from dotenv import load_dotenv
 from openai import OpenAI
 
-load_dotenv()
 
 class OpenAIClient:
     def __init__(self, model: str = "gpt-4.1-nano", temperature: float = 0.1):

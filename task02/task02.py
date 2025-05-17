@@ -3,10 +3,6 @@ import re
 import requests
 import logging
 
-import os
-from openai import OpenAI
-from bs4 import BeautifulSoup
-
 from openai_client import OpenAIClient
 
 
