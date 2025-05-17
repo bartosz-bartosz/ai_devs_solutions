@@ -25,4 +25,8 @@ class CentralaClient:
 
     def send_answer(self, answer: str | dict):
         self.logger.info("Sending answer to Centrala...")
-        requests.post(url=self.report_url, json=self._construct_payload(answer))
+
+        response = requests.post(url=self.report_url, json=self._construct_payload(answer))
+
+        self.logger.info(f"Response status code: {response.status_code}")
+        self.logger.info(f"Response content: {response.content.decode('utf-8')}")
