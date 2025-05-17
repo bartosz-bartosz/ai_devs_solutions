@@ -83,7 +83,7 @@ def main():
 
     # Initialize clients
     task_client = WebClient()
-    open_ai_client = OpenAIClient()
+    open_ai_client = OpenAIClient(system_prompt=SYSTEM_PROMPT)
     prompt_cleaner = PromptCleaner()
 
     # Send initial request to server
@@ -91,7 +91,6 @@ def main():
     question, msg_id = prompt_cleaner.parse_initial_question(response)
 
     # Send question to OpenAI API
-    open_ai_client._set_system_prompt(SYSTEM_PROMPT)
     answer = open_ai_client.send_message(question)
 
     # Send answer to server

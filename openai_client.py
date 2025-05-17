@@ -4,11 +4,11 @@ from openai import OpenAI
 
 
 class OpenAIClient:
-    def __init__(self, model: str = "gpt-4.1-nano", temperature: float = 0.1):
+    def __init__(self, model: str = "gpt-4.1-nano", temperature: float = 0.1, system_prompt: str = ""):
         self.logger = logging.getLogger("OpenAIClient")
         self.model = model
         self.client = OpenAI(api_key=self._get_api_key())
-        self.system_prompt = ""
+        self.system_prompt = system_prompt
         self.temperature = temperature
 
     def send_message(self, message: str) -> str:
