@@ -1,0 +1,9 @@
+# Dot files
+.env
+.DS_Store
+
+# Virtual environment
+venv/
+
+# Catalogs
+__pycache__/
