@@ -1,6 +1,7 @@
 import logging
 import json
 import requests
+import re
 
 
 class LocalLLMClient:
@@ -36,6 +37,26 @@ class LocalLLMClient:
         self.temperature = temperature
         self.base_url = base_url
 
+    def _clean_response(self, text: str) -> str:
+        """
+        Removes <think>thinking content</think> tags from the response.
+
+        Args:
+            text (str): The response text to clean.
+
+        Returns:
+            str: The cleaned response text.
+        """
+        # Use regular expression to remove <think>...</think> blocks
+        cleaned_text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+
+        # If we removed something, log it
+        if text != cleaned_text:
+            self.logger.debug(f"Original response: {text}")
+            self.logger.info("Removed thinking section from response")
+
+        return cleaned_text.strip()
+
     def send_message(self, message: str, max_tokens: int = 1000, stream: bool = False) -> str:
         """
         Sends a message to the local LLM API and retrieves the response.
@@ -46,7 +67,7 @@ class LocalLLMClient:
             stream (bool): Whether to stream the response.
 
         Returns:
-            str: The response from the API.
+            str: The response from the API with any thinking sections removed.
 
         Raises:
             Exception: If an error occurs while communicating with the API.
@@ -79,7 +100,10 @@ class LocalLLMClient:
 
             # Parse the response
             response_data = response.json()
-            answer = response_data["choices"][0]["message"]["content"].strip()
+            raw_answer = response_data["choices"][0]["message"]["content"]
+
+            # Clean the response to remove thinking sections
+            answer = self._clean_response(raw_answer)
 
             # Log the received answer
             self.logger.info(f"Received answer: {answer}")
@@ -113,66 +137,4 @@ class LocalLLMClient:
         Raises:
             Exception: If an error occurs while communicating with the API.
         """
-        # Ensure the message is properly encoded
-        message.encode("utf-8")
-
-        try:
-            # Prepare the request payload
-            payload = {
-                "model": self.model,
-                "messages": [
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": message},
-                ],
-                "response_format": {
-                    "type": "json_schema",
-                    "json_schema": {"name": schema_name, "strict": "true", "schema": schema},
-                },
-                "temperature": self.temperature,
-                "max_tokens": max_tokens,
-                "stream": False,
-            }
-
-            # Send the message to the local LLM API and retrieve the response
-            response = requests.post(
-                f"{self.base_url}/v1/chat/completions",
-                headers={"Content-Type": "application/json"},
-                data=json.dumps(payload),
-            )
-
-            # Raise an exception if the request was unsuccessful
-            response.raise_for_status()
-
-            # Parse the response
-            response_data = response.json()
-            json_content = response_data["choices"][0]["message"]["content"]
-            answer = json.loads(json_content)
-
-            # Log the received answer (summarized for large responses)
-            self.logger.info(f"Received JSON response: {str(answer)[:100]}...")
-
-            return answer
-
-        except requests.exceptions.RequestException as e:
-            # Log the error and re-raise the exception
-            self.logger.error(f"Error communicating with local LLM API: {e}")
-            raise
-        except json.JSONDecodeError as e:
-            # Log the error and re-raise the exception
-            self.logger.error(f"Error parsing JSON response: {e}")
-            raise
-        except Exception as e:
-            # Log the error and re-raise the exception
-            self.logger.error(f"Unexpected error: {e}")
-            raise
-
-    def _set_system_prompt(self, prompt: str):
-        """
-        Updates the system prompt for the local LLM.
-
-        Args:
-            prompt (str): The new system prompt.
-        """
-        # Log the update of the system prompt
-        self.logger.info("Setting system prompt")
-        self.system_prompt = prompt
+        # Ensure the message is properly e

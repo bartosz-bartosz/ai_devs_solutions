@@ -56,9 +56,13 @@ class TaskSolver:
 
 def main():
     # Instantiate clients
-    # llm_client = OpenAIClient(system_prompt=LLM_PROMPT)
+
+    # OpenAI Client:
+    # llm_client = OpenAIClient(system_prompt=LLM_PROMPT)  # Turned off - local LLM works just as good for this task
+
     # or use the local LLM client:
     llm_client = LocalLLMClient(system_prompt=LLM_PROMPT)
+
     centrala_client = CentralaClient(task_identifier="CENZURA")
     task_solver = TaskSolver()
 
