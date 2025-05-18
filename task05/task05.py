@@ -3,6 +3,7 @@ import requests
 import os
 
 from centrala_client import CentralaClient
+from local_llm_client import LocalLLMClient
 from openai_client import OpenAIClient
 
 LLM_PROMPT = """
@@ -55,7 +56,9 @@ class TaskSolver:
 
 def main():
     # Instantiate clients
-    openai_client = OpenAIClient(system_prompt=LLM_PROMPT)
+    # llm_client = OpenAIClient(system_prompt=LLM_PROMPT)
+    # or use the local LLM client:
+    llm_client = LocalLLMClient(system_prompt=LLM_PROMPT)
     centrala_client = CentralaClient(task_identifier="CENZURA")
     task_solver = TaskSolver()
 
@@ -66,7 +69,7 @@ def main():
     logging.info(f"Text to censor: {text_to_censor}")
 
     # Censore the text with OpenAI
-    censored_text = openai_client.send_message(text_to_censor)
+    censored_text = llm_client.send_message(text_to_censor)
 
     # Send response to Centrala
     centrala_client.send_answer(answer=censored_text)
