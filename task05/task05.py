@@ -2,9 +2,9 @@ import logging
 import requests
 import os
 
-from centrala_client import CentralaClient
-from local_llm_client import LocalLLMClient
-from openai_client import OpenAIClient
+from clients.centrala_client import CentralaClient
+from clients.local_llm_client import LocalLLMClient
+from clients.openai_client import OpenAIClient
 
 LLM_PROMPT = """
 Censorship Tool for Personal Information in Polish Text
@@ -77,7 +77,3 @@ def main():
 
     # Send response to Centrala
     centrala_client.send_answer(answer=censored_text)
-
-
-if __name__ == "__main__":
-    main()

@@ -1,9 +1,8 @@
 import json
-import re
 import requests
 import logging
 
-from openai_client import OpenAIClient
+from clients.openai_client import OpenAIClient
 
 
 class WebClient:
@@ -97,6 +96,3 @@ def main():
     web_client_response = task_client.verify(answer, msg_id)
     logging.info(f"Server response: {web_client_response}")
 
-
-if __name__ == "__main__":
-    main()

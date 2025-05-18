@@ -2,8 +2,8 @@ import logging
 import json
 import os
 
-from centrala_client import CentralaClient
-from openai_client import OpenAIClient
+from clients.centrala_client import CentralaClient
+from clients.openai_client import OpenAIClient
 
 TASK_IDENTIFIER = "JSON"
 
@@ -90,7 +90,3 @@ def main():
 
     # Send the answer to Centrala
     centrala_client.send_answer(task_solver.json_content)
-
-
-if __name__ == "__main__":
-    main()
