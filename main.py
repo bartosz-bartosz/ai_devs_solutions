@@ -55,3 +55,7 @@ def main():
         logging.error(f"An error occurred while running the task: {e}")
         sys.exit(1)
 
+if __name__ == "__main__":
+    # Entry point of the script
+    main()
+
