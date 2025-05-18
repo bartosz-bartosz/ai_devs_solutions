@@ -5,12 +5,15 @@ import sys
 
 from dotenv import load_dotenv
 
+# List of tasks that are excluded from being run as scripts
 EXCLUDED_TASKS = ["04"]
 
 def setup_logging():
+    """Set up logging configuration for the application."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def main():
+    """Main function to parse arguments, validate tasks, and execute the specified task."""
     # Load environment variables from .env file
     load_dotenv()
 
@@ -25,6 +28,7 @@ def main():
     args = parser.parse_args()
     task_id = args.task
 
+    # Check if the task is in the excluded list
     if task_id in EXCLUDED_TASKS:
         logging.info(f"Task '{task_id}' is not intended to run as a script. Visit the task directory and solve manually.")
         sys.exit(0)
@@ -43,12 +47,15 @@ def main():
         task_module.main()
 
     except ModuleNotFoundError:
+        # Handle the case where the task module is not found
         logging.error(f"Task '{task_id}' not found. Make sure the task directory and file exist.")
         sys.exit(1)
     except Exception as e:
+        # Handle any other exceptions that occur during task execution
         logging.error(f"An error occurred while running the task: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
+    # Entry point of the script
     main()
 
