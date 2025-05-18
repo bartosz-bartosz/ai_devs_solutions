@@ -1,0 +1,12 @@
+You need to create a sequence of moves consisted of the allowed words:
+UP, DOWN, RIGHT, LEFT
+The words can repeat.
+
+The sequence you create should be based on the description of the moves in the user message.
+Your response should contain ONLY the JSON object with the sequence. Do not include any additional text or explanation. The JSON object should look like this:
+
+{"steps": "your sequence here"}
+
+The description:
+Go twice upwards, then twice to the right side, then go downwards twice, and then go right three times.
+
