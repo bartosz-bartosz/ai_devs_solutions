@@ -5,6 +5,7 @@ import sys
 
 from dotenv import load_dotenv
 
+EXCLUDED_TASKS = ["04"]
 
 def setup_logging():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -23,6 +24,10 @@ def main():
     # Parse arguments
     args = parser.parse_args()
     task_id = args.task
+
+    if task_id in EXCLUDED_TASKS:
+        logging.info(f"Task '{task_id}' is not intended to run as a script. Visit the task directory and solve manually.")
+        sys.exit(0)
 
     try:
         # Dynamically import the task module
@@ -44,6 +49,6 @@ def main():
         logging.error(f"An error occurred while running the task: {e}")
         sys.exit(1)
 
-
 if __name__ == "__main__":
     main()
+
