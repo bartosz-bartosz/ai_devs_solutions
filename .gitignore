@@ -7,3 +7,6 @@ venv/
 
 # Catalogs
 __pycache__/
+
+# Media files
+*.m4a
