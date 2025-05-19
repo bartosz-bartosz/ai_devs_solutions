@@ -4,7 +4,7 @@ import os
 
 from clients.centrala_client import CentralaClient
 from clients.local_llm_client import LocalLLMClient
-from clients.openai_client import OpenAIClient
+from clients.openai_client import ChatConfig, OpenAIClient
 
 LLM_PROMPT = """
 Censorship Tool for Personal Information in Polish Text
@@ -58,7 +58,8 @@ def main():
     # Instantiate clients
 
     # OpenAI Client:
-    llm_client = OpenAIClient(system_prompt=LLM_PROMPT)  # Turned off - local LLM works just as good for this task
+    chat_config = ChatConfig(system_prompt=LLM_PROMPT)
+    llm_client = OpenAIClient()  # Turned off - local LLM works just as good for this task
 
     # or use the local LLM client:
     # llm_client = LocalLLMClient(system_prompt=LLM_PROMPT)
@@ -73,7 +74,7 @@ def main():
     logging.info(f"Text to censor: {text_to_censor}")
 
     # Censore the text with OpenAI
-    censored_text = llm_client.send_message(text_to_censor)
+    censored_text = llm_client.send_message(config=chat_config, message=text_to_censor)
 
     # Send response to Centrala
     centrala_client.send_answer(answer=censored_text)

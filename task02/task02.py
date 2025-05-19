@@ -1,8 +1,9 @@
 import json
+from openai import chat
 import requests
 import logging
 
-from clients.openai_client import OpenAIClient
+from clients.openai_client import ChatConfig, OpenAIClient
 
 
 class WebClient:
@@ -80,9 +81,10 @@ def main():
 
     logging.info("Starting task02...")
 
+    chat_config = ChatConfig(system_prompt=SYSTEM_PROMPT)
     # Initialize clients
     task_client = WebClient()
-    open_ai_client = OpenAIClient(system_prompt=SYSTEM_PROMPT)
+    open_ai_client = OpenAIClient()
     prompt_cleaner = PromptCleaner()
 
     # Send initial request to server
@@ -90,9 +92,8 @@ def main():
     question, msg_id = prompt_cleaner.parse_initial_question(response)
 
     # Send question to OpenAI API
-    answer = open_ai_client.send_message(question)
+    answer = open_ai_client.send_message(config=chat_config, message=question)
 
     # Send answer to server
     web_client_response = task_client.verify(answer, msg_id)
     logging.info(f"Server response: {web_client_response}")
-

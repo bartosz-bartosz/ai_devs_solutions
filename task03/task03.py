@@ -3,7 +3,7 @@ import json
 import os
 
 from clients.centrala_client import CentralaClient
-from clients.openai_client import OpenAIClient
+from clients.openai_client import ChatConfig, OpenAIClient
 
 TASK_IDENTIFIER = "JSON"
 
@@ -57,7 +57,7 @@ class TaskSolver:
                     logging.info(
                         f"Recognized a question for LLM: {question_for_llm}. Asking OpenAI..."
                     )
-                    llm_answer = self.openai_client.send_message(question_for_llm)
+                    llm_answer = self.openai_client.send_message(config=ChatConfig(system_prompt=SYSTEM_PROMPT), message=question_for_llm)
                     logging.info(f"LLM answer: {llm_answer}")
                     question["test"]["a"] = llm_answer
                 self.processed_questions.append(question)
@@ -74,7 +74,7 @@ def main():
     logging.info("Starting task 03...")
 
     # Instantiate classes
-    openai_client = OpenAIClient(system_prompt=SYSTEM_PROMPT)
+    openai_client = OpenAIClient()
     centrala_client = CentralaClient(task_identifier=TASK_IDENTIFIER)
     task_solver = TaskSolver(input_json_file="task_input.json", openai_client=openai_client)
 
