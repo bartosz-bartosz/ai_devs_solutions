@@ -7,12 +7,6 @@ import re
 class LocalLLMClient:
     """
     A client for interacting with a local LLM server through LM Studio.
-
-    Attributes:
-        model (str): The model to use for generating responses.
-        temperature (float): The temperature setting for response generation.
-        system_prompt (str): The system prompt to guide the model's behavior.
-        base_url (str): The base URL for the local LLM API.
     """
 
     def __init__(
