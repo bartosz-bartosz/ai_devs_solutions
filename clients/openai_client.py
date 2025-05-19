@@ -8,11 +8,6 @@ from openai import OpenAI
 class OpenAIClient:
     """
     A client for interacting with the OpenAI API.
-
-    Attributes:
-        model (str): The model to use for generating responses.
-        temperature (float): The temperature setting for response generation.
-        system_prompt (str): The system prompt to guide the model's behavior.
     """
 
     def __init__(self, model: str = "gpt-4.1-nano", temperature: float = 0.1, system_prompt: str = ""):
