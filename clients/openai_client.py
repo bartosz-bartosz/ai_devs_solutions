@@ -63,6 +63,37 @@ class OpenAIClient:
             self.logger.error(f"Error communicating with OpenAI API: {e}")
             raise
 
+    def audio_to_text(self, audio_file_path: str) -> str:
+        """
+        Transcribes an audio file using the OpenAI API.
+
+        Args:
+            audio_file_path (str): The path to the audio file to transcribe.
+
+        Returns:
+            str: The transcribed text from the audio file.
+
+        Raises:
+            Exception: If an error occurs during transcription.
+        """
+        try:
+            with open(audio_file_path, "rb") as audio_file:
+                response = self.client.audio.transcriptions.create(
+                    file=audio_file,
+                    model="whisper-1"
+                )
+                transcription = response["text"].strip()
+
+                # Log the transcription result
+                self.logger.info(f"Transcription result: {transcription}")
+
+                return transcription
+
+        except Exception as e:
+            # Log the error and re-raise the exception
+            self.logger.error(f"Error during audio transcription: {e}")
+            raise
+
     def _get_api_key(self):
         """
         Retrieves the OpenAI API key from the environment variables.
@@ -90,4 +121,3 @@ class OpenAIClient:
         # Log the update of the system prompt
         self.logger.info("Setting system prompt")
         self.system_prompt = prompt
-
