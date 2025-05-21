@@ -6,7 +6,7 @@ from clients.centrala_client import CentralaClient
 from clients.local_llm_client import LocalLLMClient
 from clients.openai_client import ChatConfig, OpenAIClient
 
-from task06.task06_prompt import SYSTEM_PROMPT
+from s02e01.prompt import SYSTEM_PROMPT
 
 
 class TaskSolver:

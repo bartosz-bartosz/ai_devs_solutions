@@ -6,7 +6,7 @@ import sys
 from dotenv import load_dotenv
 
 # List of tasks that are excluded from being run as scripts
-EXCLUDED_TASKS = ["04"]
+EXCLUDED_TASKS = ["s01e04"]
 
 def setup_logging():
     """Set up logging configuration for the application."""
@@ -22,7 +22,7 @@ def main():
 
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Run a specific task by specifying its name.")
-    parser.add_argument("--task", required=True, help="The task id to run (e.g., '03').")
+    parser.add_argument("--task", required=True, help="The task id to run (e.g., 's01e03').")
 
     # Parse arguments
     args = parser.parse_args()
@@ -35,7 +35,7 @@ def main():
 
     try:
         # Dynamically import the task module
-        task_module = importlib.import_module(f"task{task_id}.task{task_id}")
+        task_module = importlib.import_module(f"{task_id}.{task_id}")
 
         # Check if the module has a main() function
         if not hasattr(task_module, "main"):
