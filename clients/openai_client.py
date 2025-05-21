@@ -7,6 +7,7 @@ from openai import OpenAI
 @dataclass
 class ChatConfig:
     """Configuration for chat completion requests."""
+
     model: str = "gpt-4.1-nano"
     temperature: float = 0.1
     system_prompt: str = ""
@@ -15,7 +16,16 @@ class ChatConfig:
 @dataclass
 class AudioConfig:
     """Configuration for audio transcription requests."""
+
     model: str = "whisper-1"
+
+
+@dataclass
+class ImageConfig:
+    """Configuration for image generation requests."""
+
+    model: str = "dall-e-3"
+    system_prompt: str = ""
 
 
 class OpenAIClient:
@@ -48,10 +58,6 @@ class OpenAIClient:
         Raises:
             Exception: If an error occurs while communicating with the API.
         """
-        # Use provided config or default
-        if config is None:
-            config = ChatConfig()
-
         # Ensure the message is properly encoded
         message.encode("utf-8")
 
@@ -98,8 +104,7 @@ class OpenAIClient:
         try:
             with open(audio_file_path, "rb") as audio_file:
                 response = self.client.audio.transcriptions.create(
-                    file=audio_file,
-                    model=config.model
+                    file=audio_file, model=config.model
                 )
                 transcription = response.text.strip()
 
@@ -111,6 +116,25 @@ class OpenAIClient:
         except Exception as e:
             # Log the error and re-raise the exception
             self.logger.error(f"Error during audio transcription: {e}")
+            raise
+
+    def generate_image(self, prompt: str, config: ImageConfig = ImageConfig(), n: int = 1) -> str:
+        logging.info("Sending request to create image...")
+        try:
+            img_response = self.client.images.generate(
+                model=config.model, prompt=prompt, n=1, size="1024x1024"
+            )
+            image_url = img_response.data[0].url
+
+            if not image_url:
+                raise Exception("No URL found in response.")
+            logging.info(f"Image URL received: {image_url}")
+
+            return image_url
+
+        except Exception as e:
+            # Log the error and re-raise the exception
+            self.logger.error(f"Error communicating with OpenAI API: {e}")
             raise
 
     def _get_api_key(self) -> str:
