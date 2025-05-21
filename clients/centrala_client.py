@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+
 class CentralaClient:
     """
     A client for interacting with the Centrala reporting API.
@@ -28,9 +29,15 @@ class CentralaClient:
             report_url (str, optional): URL of the Centrala reporting endpoint. Defaults to the Centrala API URL.
         """
         self.logger = logging.getLogger("CentralaClient")
-        self.api_key = os.environ.get("CENTRALA_API_KEY")
+        self.api_key: str = self._get_api_key()
         self.report_url = report_url
         self.task_identifier = task_identifier
+
+    def _get_api_key(self) -> str:
+        api_key = os.environ.get("CENTRALA_API_KEY")
+        if not api_key:
+            raise Exception("API key for Centrala is missing. Add the key to env.")
+        return api_key
 
     def _construct_payload(self, answer: str | dict):
         """
@@ -64,4 +71,3 @@ class CentralaClient:
 
         self.logger.info(f"Response status code: {response.status_code}")
         self.logger.info(f"Response content: {response.content.decode('utf-8')}")
-
