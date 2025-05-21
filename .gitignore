@@ -10,3 +10,6 @@ __pycache__/
 
 # Media files
 *.m4a
+*.jpeg
+*.jpg
+*.png
