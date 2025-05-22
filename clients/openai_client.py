@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 from dataclasses import dataclass
@@ -119,7 +120,7 @@ class OpenAIClient:
             raise
 
     def generate_image(self, prompt: str, config: ImageConfig = ImageConfig(), n: int = 1) -> str:
-        logging.info("Sending request to create image...")
+        self.logger.info("Sending request to create image...")
         try:
             img_response = self.client.images.generate(
                 model=config.model, prompt=prompt, n=1, size="1024x1024"
@@ -128,13 +129,79 @@ class OpenAIClient:
 
             if not image_url:
                 raise Exception("No URL found in response.")
-            logging.info(f"Image URL received: {image_url}")
+            self.logger.info(f"Image URL received: {image_url}")
 
             return image_url
 
         except Exception as e:
             # Log the error and re-raise the exception
             self.logger.error(f"Error communicating with OpenAI API: {e}")
+            raise
+
+    def image_to_text(self, image_file_path: str, config: ChatConfig = ChatConfig()) -> str:
+        """
+        Analyzes an image file using the OpenAI API and returns a description.
+
+        Args:
+            image_file_path (str): The path to the image file to analyze.
+            config (ChatConfig, optional): Configuration for the chat request.
+
+        Returns:
+            str: The description of the image.
+
+        Raises:
+            Exception: If an error occurs during image analysis.
+        """
+        self.logger.info(f"Sending request to analyze image: {image_file_path}")
+        try:
+            # Read and encode the image file
+            with open(image_file_path, "rb") as image_file:
+
+                image_data = base64.b64encode(image_file.read()).decode("utf-8")
+
+            # Determine the image format from file extension
+            file_extension = os.path.splitext(image_file_path)[1].lower()
+            if file_extension in [".jpg", ".jpeg"]:
+                image_format = "jpeg"
+            elif file_extension == ".png":
+                image_format = "png"
+            elif file_extension == ".gif":
+                image_format = "gif"
+            elif file_extension == ".webp":
+                image_format = "webp"
+            else:
+                image_format = "jpeg"  # Default fallback
+
+            # Send the image to the OpenAI API
+            response = self.client.chat.completions.create(
+                model=config.model,
+                messages=[
+                    {"role": "system", "content": config.system_prompt},
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/{image_format};base64,{image_data}"
+                                },
+                            }
+                        ],
+                    },
+                ],
+                temperature=config.temperature,
+            )
+
+            description = response.choices[0].message.content.strip()
+
+            # Log the received description
+            self.logger.info(f"Received image transcription: {description}")
+
+            return description
+
+        except Exception as e:
+            # Log the error and re-raise the exception
+            self.logger.error(f"Error during image analysis: {e}")
             raise
 
     def _get_api_key(self) -> str:
