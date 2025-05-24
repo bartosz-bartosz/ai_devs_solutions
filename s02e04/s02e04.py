@@ -4,8 +4,7 @@ import os
 from typing import Callable
 
 from clients.centrala_client import CentralaClient
-from clients.local_llm_client import LocalLLMClient
-from clients.openai_client import AudioConfig, ChatConfig, ImageConfig, OpenAIClient
+from clients.openai_client import AudioConfig, ChatConfig, OpenAIClient
 
 from s02e04.prompts import CATEGORIZE_PROMPT, IMAGE_PROMPT
 
