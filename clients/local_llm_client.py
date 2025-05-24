@@ -3,6 +3,8 @@ import json
 import requests
 import re
 
+from clients.llm_configs import ChatConfig, AudioConfig, ImageConfig
+
 
 class LocalLLMClient:
     """
@@ -11,9 +13,6 @@ class LocalLLMClient:
 
     def __init__(
         self,
-        model: str = "deepseek-r1-distill-qwen-7b:2",
-        temperature: float = 0.1,
-        system_prompt: str = "",
         base_url: str = "http://127.0.0.1:1234",
     ):
         """
@@ -26,9 +25,6 @@ class LocalLLMClient:
             base_url (str): The base URL for the local LLM API.
         """
         self.logger = logging.getLogger("LocalLLMClient")
-        self.model = model
-        self.system_prompt = system_prompt
-        self.temperature = temperature
         self.base_url = base_url
 
     def _clean_response(self, text: str) -> str:
@@ -51,7 +47,12 @@ class LocalLLMClient:
 
         return cleaned_text.strip()
 
-    def send_message(self, message: str, max_tokens: int = 1000, stream: bool = False) -> str:
+    def send_message(
+        self,
+        message: str,
+        stream: bool = False,
+        config: ChatConfig = ChatConfig(),
+    ) -> str:
         """
         Sends a message to the local LLM API and retrieves the response.
 
@@ -72,13 +73,13 @@ class LocalLLMClient:
         try:
             # Prepare the request payload
             payload = {
-                "model": self.model,
+                "model": config.model,
                 "messages": [
-                    {"role": "system", "content": self.system_prompt},
+                    {"role": "system", "content": config.system_prompt},
                     {"role": "user", "content": message},
                 ],
-                "temperature": self.temperature,
-                "max_tokens": max_tokens,
+                "temperature": config.temperature,
+                "max_tokens": config.max_tokens,
                 "stream": stream,
             }
 
@@ -131,4 +132,4 @@ class LocalLLMClient:
         Raises:
             Exception: If an error occurs while communicating with the API.
         """
-        # Ensure the message is properly e
+        pass
