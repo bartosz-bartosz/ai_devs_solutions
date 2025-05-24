@@ -9,9 +9,10 @@ This repository contains solutions for the AI Devs 3 course tasks. The project i
 ├── requirements.txt    # Project dependencies
 ├── main.py             # Main script to run tasks
 ├── clients/            # Client modules for API interactions
-├── task01/             # Task 1 implementation
-├── task02/             # Task 2 implementation
-├── task03/             # Task 3 implementation
+├── s01e01/             # S01E01 task implementation
+├── s01e02/             # S01E02 task implementation
+├── ...
+├── s02e01/             # S02E01 task implementation
 └── ...
 ```
 
@@ -47,7 +48,7 @@ python main.py --task <task_number>
 
 For example, to run task 1:
 ```bash
-python main.py --task 01
+python main.py --task s01e03
 ```
 
 ## Project Components
@@ -56,4 +57,4 @@ python main.py --task 01
 - `centrala_client.py`: Client for interacting with the central API
 - `openai_client.py`: Client for OpenAI API interactions
 - `local_client.py`: Client for local model interactions
-- Task directories (`task01/`, `task02/`, etc.): Individual task implementations
+- Task directories (`s01e01/`, `s01e02/`, etc.): Individual task implementations
