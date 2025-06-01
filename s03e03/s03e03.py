@@ -5,6 +5,10 @@ from clients.centrala_client import CentralaClient
 
 
 class TaskSolver:
+    """
+    Provides methods to interact with the database via CentralaClient.
+    """
+
     def __init__(self, centrala_client: CentralaClient):
         """
         Initializes the TaskSolver with a CentralaClient instance.
@@ -17,12 +21,16 @@ class TaskSolver:
     def show_tables(self):
         """
         Returns a list of tables in the database.
+
+        Returns:
+            list[str]: List of table names.
         """
         logging.info("Fetching list of tables from the database.")
 
         sql_query = "SHOW TABLES;"
         database_response = self.centrala_client.query_database(query=sql_query)
         database_response = database_response.get("reply", {})
+        # Extract table names from the response
         tables = [v for item in database_response for v in item.values()]
         return tables
 
@@ -43,7 +51,8 @@ class TaskSolver:
 
         logging.info(f"Response from database for table {table_name}: {database_response}")
 
-        return database_response.get("reply", {})[0].get("Create Table", "")
+        # Extract the CREATE TABLE statement from the response
+        return database_response.get("reply", [{}])[0].get("Create Table", "")
 
     def select_all_from_table(self, table_name: str, order_by: str = ""):
         """
@@ -51,6 +60,7 @@ class TaskSolver:
 
         Args:
             table_name (str): The name of the table.
+            order_by (str, optional): Column name to order by.
 
         Returns:
             list[dict]: A list of rows, where each row is represented as a dictionary.
@@ -60,7 +70,6 @@ class TaskSolver:
         sql_query = f"SELECT * FROM {table_name}"
         if order_by:
             sql_query += f" ORDER BY {order_by}"
-
         sql_query += ";"
 
         database_response = self.centrala_client.query_database(query=sql_query)
@@ -70,6 +79,13 @@ class TaskSolver:
         return database_response.get("reply", [])
 
     def get_the_solution(self):
+        """
+        Fetches the solution by querying for active datacenters managed by inactive users.
+        The query was created by LLM but in chat mode - maybe too easy solution but well.
+
+        Returns:
+            list[dict]: List of dictionaries containing 'dc_id'.
+        """
         logging.info("Fetching the solution from the database.")
 
         sql_query = """
@@ -82,7 +98,11 @@ class TaskSolver:
         database_response = self.centrala_client.query_database(query=sql_query)
         return database_response.get("reply", [])
 
+
 def main():
+    """
+    Main execution function to interact with the database and send the answer.
+    """
     centrala_client = CentralaClient(task_identifier="database")
     solver = TaskSolver(centrala_client=centrala_client)
 
@@ -93,16 +113,19 @@ def main():
         table_create = solver.show_create_table(table_name=table)
         table_create_statements[table] = table_create
 
-    logging.info(f" Table create statements: {json.dumps(table_create_statements, indent=2)}")
+    logging.info(f"Table create statements: {json.dumps(table_create_statements, indent=2)}")
 
+    # Fetch the correct order and reconstruct the secret flag
     correct_order_reply = solver.select_all_from_table(
         table_name="correct_order", order_by="weight"
     )
     secret_flag = "".join([item["letter"] for item in correct_order_reply])
     logging.info(f"Secret flag: {secret_flag}")
 
+    # Get the solution and send the answer
     solution_response = solver.get_the_solution()
     dc_ids = [item["dc_id"] for item in solution_response]
 
     centrala_client.send_answer(answer=dc_ids)
+
 
