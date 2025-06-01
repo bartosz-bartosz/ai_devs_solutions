@@ -179,6 +179,33 @@ class OpenAIClient:
             self.logger.error(f"Error during image analysis: {e}")
             raise
 
+
+    def create_embedding(self, input_text: str, model: str = "text-embedding-3-small") -> list:
+        """
+        Creates an embedding for the input text using the OpenAI API.
+
+        Args:
+            input_text (str): The text to embed.
+            model (str, optional): The embedding model to use.
+
+        Returns:
+            list: The embedding vector.
+
+        Raises:
+            Exception: If an error occurs during embedding creation.
+        """
+        try:
+            response = self.client.embeddings.create(
+                input=input_text,
+                model=model
+            )
+            embedding = response.data[0].embedding
+            self.logger.info("Embedding created successfully.")
+            return embedding
+        except Exception as e:
+            self.logger.error(f"Error creating embedding: {e}")
+            raise
+
     def _get_api_key(self) -> str:
         """
         Retrieves the OpenAI API key from the environment variables.
