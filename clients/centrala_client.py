@@ -19,7 +19,10 @@ class CentralaClient:
     """
 
     def __init__(
-        self, task_identifier: str, report_url: str = "https://c3ntrala.ag3nts.org/report"
+        self,
+        task_identifier: str,
+        report_url: str = "https://c3ntrala.ag3nts.org/report",
+        apidb_url: str = "https://c3ntrala.ag3nts.org/apidb",
     ):
         """
         Initializes the CentralaClient with the given task identifier and report URL.
@@ -31,6 +34,7 @@ class CentralaClient:
         self.logger = logging.getLogger("CentralaClient")
         self.api_key: str = self._get_api_key()
         self.report_url = report_url
+        self.apidb_url = apidb_url
         self.task_identifier = task_identifier
 
     def _get_api_key(self) -> str:
@@ -39,7 +43,7 @@ class CentralaClient:
             raise Exception("API key for Centrala is missing. Add the key to env.")
         return api_key
 
-    def _construct_payload(self, answer: str | dict):
+    def _construct_payload(self, answer: str | dict | list):
         """
         Constructs the payload for the API request.
 
@@ -55,7 +59,24 @@ class CentralaClient:
             "answer": answer,
         }
 
-    def send_answer(self, answer: str | dict):
+    def _construct_query_payload(self, query: str):
+        """
+        Constructs the payload for a database query request.
+
+        Args:
+        query (str): The query string to be sent to the Centrala API.
+
+        Returns:
+            dict: The payload containing the task identifier, API key, and query.
+        """
+
+        return {
+            "task": self.task_identifier,
+            "apikey": self.api_key,
+            "query": query,
+        }
+
+    def send_answer(self, answer: str | dict | list):
         """
         Sends the answer to the Centrala API.
 
@@ -85,8 +106,8 @@ class CentralaClient:
         self.logger.info("Querying Centrala database...")
 
         response = requests.post(
-            url=self.report_url,
-            json=self._construct_payload({"query": query}),
+            url=self.apidb_url,
+            json=self._construct_query_payload(query)
         )
 
         self.logger.info(f"Response status code: {response.status_code}")
