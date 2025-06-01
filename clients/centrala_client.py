@@ -71,3 +71,25 @@ class CentralaClient:
 
         self.logger.info(f"Response status code: {response.status_code}")
         self.logger.info(f"Response content: {response.content.decode('utf-8')}")
+
+    def query_database(self, query: str):
+        """
+        Queries the Centrala database with the given query string.
+
+        Args:
+            query (str): The query string to be sent to the Centrala API.
+
+        Returns:
+            dict: The response from the Centrala API.
+        """
+        self.logger.info("Querying Centrala database...")
+
+        response = requests.post(
+            url=self.report_url,
+            json=self._construct_payload({"query": query}),
+        )
+
+        self.logger.info(f"Response status code: {response.status_code}")
+        self.logger.info(f"Response content: {response.content.decode('utf-8')}")
+
+        return response.json()
