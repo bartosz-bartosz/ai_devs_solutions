@@ -72,6 +72,7 @@ class CentralaClient:
             dict: The payload containing the API key and query.
         """
         return {
+            "task": self.task_identifier,
             "apikey": self.api_key,
             "query": query,
         }
@@ -111,7 +112,7 @@ class CentralaClient:
         url = f"{self.base_url}/{endpoint}"
         payload = self._construct_query_payload(query)
 
-        self.logger.info(f"Querying {endpoint} endpoint with query: {query}")
+        self.logger.info(f"Querying {endpoint} endpoint with query: {query}, payload: {payload}")
 
         try:
             response = requests.post(url=url, json=payload)
