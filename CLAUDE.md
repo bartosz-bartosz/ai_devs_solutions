@@ -49,6 +49,7 @@ Most tasks follow this structure:
 2. Implement business logic in `main()` function
 3. Use logging for progress tracking
 4. Submit results via CentralaClient.send_answer()
+5. **Extract and return the flag** - Each successful task returns a flag in format `{{FLG:VALUE}}`
 
 ### Dependencies
 Core dependencies: `openai`, `requests`, `beautifulsoup4`, `python-dotenv`
@@ -122,7 +123,16 @@ def main():
         
         # Send answer to Centrala
         logger.info(f"Sending answer to Centrala: {answer}")
-        solver.centrala_client.send_answer(answer)
+        response = solver.centrala_client.send_answer(answer)
+        
+        # Extract and log the flag from successful response
+        if response and "message" in response and "FLG:" in response["message"]:
+            flag_start = response["message"].find("FLG:") + 4
+            flag_end = response["message"].find("}", flag_start)
+            if flag_end > flag_start:
+                flag = response["message"][flag_start:flag_end]
+                logger.info(f"Task completed successfully! Flag: {flag}")
+                return flag
         
         logger.info("Task completed successfully!")
         
@@ -167,3 +177,10 @@ if __name__ == "__main__":
 - Run via main script: `python main.py --task s##e##`
 - Check logs for debugging information
 - Verify answer format matches expected Centrala requirements
+- **Success is indicated by receiving a flag** in format `{{FLG:VALUE}}` from Centrala API
+
+### Task Success Criteria
+- Each task aims to obtain a **flag** from the Centrala API
+- Successful completion returns HTTP 200 with message containing `{{FLG:VALUE}}`
+- The flag value should be extracted and logged/returned for verification
+- Common flag examples: `{{FLG:AUTOMATIC}}`, `{{FLG:SUCCESS}}`, etc.
